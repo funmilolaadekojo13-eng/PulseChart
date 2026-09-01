@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings · PulseChart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=7">
+<style>
+.set{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:16px}
+.set > h2{font-size:13.5px;margin-bottom:2px}
+.set > .sub{font-size:12px;color:var(--mut);margin-bottom:14px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.saved{font-size:12px;font-weight:600;color:var(--tint-fg);opacity:0;transition:opacity .25s}
+.saved.show{opacity:1}
+.chipedit{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+.chipedit .chip{display:inline-flex;align-items:center;gap:7px;background:var(--tint);color:var(--tint-fg);border-radius:999px;padding:5px 8px 5px 12px;font:600 12px 'Plus Jakarta Sans',sans-serif}
+.chipedit .chip button{border:0;background:none;color:inherit;cursor:pointer;display:flex;padding:2px;border-radius:6px}
+.chipedit .chip button:hover{background:rgba(0,0,0,.08)}
+.addchip{display:flex;gap:8px;margin-bottom:12px}
+.addchip input{flex:1;margin-top:0}
+.tpl{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.tpl pre{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:14px;font:12px/1.7 'Plus Jakarta Sans',sans-serif;white-space:pre-wrap;color:#42514A;align-self:start}
+.ph{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.ph button{border:1px solid var(--field);background:#fff;border-radius:999px;padding:4px 10px;font:600 11px 'Plus Jakarta Sans',sans-serif;cursor:pointer;color:#42514A}
+.ph button:hover{border-color:var(--acc);color:var(--tint-fg)}
+.exp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.exp label{display:flex;align-items:center;gap:8px;font-weight:500;font-size:12.5px;cursor:pointer;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin:0}
+.exp input{width:auto;margin:0}
+.locked{position:relative}
+.lockveil{position:absolute;inset:0;background:rgba(244,246,245,.75);backdrop-filter:blur(1.5px);border-radius:12px;display:flex;align-items:center;justify-content:center;z-index:5}
+.lockveil span{background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 15px;font:600 12px 'Plus Jakarta Sans',sans-serif;color:var(--mut);box-shadow:0 6px 18px rgba(20,30,25,.08)}
+.warnbox{background:var(--warn-bg);border:1px solid var(--warn-line);color:var(--warn);border-radius:10px;padding:11px 14px;font-size:12.5px;font-weight:600;margin-bottom:16px}
+@media(max-width:760px){.two,.tpl,.exp{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<section id="app">
+  <aside class="side">
+    <div class="slogo">PulseChart<small class="practice"></small></div>
+    <nav class="nav">
+      <span data-ic="users">Patients</span>
+      <span data-ic="calendar">Follow-ups</span>
+      <span data-ic="pill">Drug favorites</span>
+    </nav>
+    <div class="sunav">Clinic</div>
+    <nav class="nav">
+      <span data-ic="userplus">Staff</span>
+      <span class="on" data-ic="sliders">Settings</span>
+    </nav>
+    <div class="suser">
+      <div><b id="sideName"></b><small id="sideRole"></small></div>
+      <button id="btnOut" class="sout" title="Sign out" data-ic="logout" data-size="16"></button>
+    </div>
+  </aside>
+
+  <div class="cont">
+    <div class="topbar">
+      <span class="crumb">Clinic / <b>Settings</b></span>
+      <div class="userchip"><span id="who"></span><span class="av" id="whoAv"></span></div>
+    </div>
+    <main>
+      <div class="page-head"><h1 class="page-title">Settings</h1></div>
+
+      <div id="sqlWarn" class="warnbox" hidden>
+        Settings could not load from the database. Run the settings SQL in Supabase (the block that creates the settings table and its one row), then reload this page.
+      </div>
+
+      <section class="set locked" id="setPractice">
+        <h2>Practice details</h2>
+        <p class="sub">Shown in the sidebar and printed on prescriptions.</p>
+        <div class="lockveil" hidden><span>Only the doctor can change practice settings</span></div>
+        <label>Practice name <input id="s-name"></label>
+        <div class="two">
+          <label>Phone <input id="s-phone"></label>
+          <label>Address <input id="s-addr"></label>
+        </div>
+        <div class="row">
+          <button class="btn" id="savePractice">Save practice details</button>
+          <span class="saved" id="savedPractice">Saved. Sidebar updated.</span>
+        </div>
+      </section>
+
+      <section class="set locked" id="setChips">
+        <h2>Visit quick chips</h2>
+        <p class="sub">One-tap complaint shortcuts in the record-visit form. Put the ones used most first.</p>
+        <div class="lockveil" hidden><span>Only the doctor can change practice settings</span></div>
+        <div class="chipedit" id="chipBox"></div>
+        <div class="addchip">
+          <input id="newChip" placeholder="Add a chip, e.g. Antenatal">
+          <button class="btn-ghost" id="addChipBtn">Add chip</button>
+        </div>
+        <div class="row">
+          <button class="btn" id="saveChips">Save chips</button>
+          <span class="saved" id="savedChips">Saved. Everyone at the clinic sees these now.</span>
+        </div>
+      </section>
+
+      <section class="set locked" id="setTpl">
+        <h2>WhatsApp reminder message</h2>
+        <p class="sub">Sent when tapping WhatsApp reminder on the follow-ups page.</p>
+        <div class="lockveil" hidden><span>Only the doctor can change practice settings</span></div>
+        <div class="tpl">
+          <div>
+            <label>Message template
+              <textarea id="tplText" rows="6"></textarea>
+            </label>
+            <div class="ph">
+              <button type="button" data-ph="{name}">{name}</button>
+              <button type="button" data-ph="{date}">{date}</button>
+              <button type="button" data-ph="{practice}">{practice}</button>
+            </div>
+            <p class="sub" style="margin-top:10px">{name} already includes the Mr / Ms title.</p>
+            <div class="row" style="margin-top:6px">
+              <button class="btn" id="saveTpl">Save message</button>
+              <span class="saved" id="savedTpl">Saved. New reminders use this wording.</span>
+            </div>
+          </div>
+          <div>
+            <label>Live preview</label>
+            <pre id="tplPreview"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="set" id="setExport">
+        <h2>Download your data</h2>
+        <p class="sub">CSV files, one per table. Everyone can export; your records are never locked in.</p>
+        <div class="exp">
+          <label><input type="checkbox" checked data-table="patients"> Patients</label>
+          <label><input type="checkbox" checked data-table="visits"> Visits</label>
+          <label><input type="checkbox" checked data-table="prescriptions"> Prescriptions</label>
+          <label><input type="checkbox" checked data-table="vitals"> Vitals</label>
+          <label><input type="checkbox" checked data-table="lab_results"> Lab results</label>
+          <label><input type="checkbox" checked data-table="drug_favorites"> Drug favorites</label>
+        </div>
+        <button class="btn" id="btnExport">Download selected as CSV</button>
+      </section>
+
+    </main>
+  </div>
+</section>
+<div id="toast" class="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js?v=7"></script>
+<script src="common.js?v=7"></script>
+<script src="settings.js?v=7"></script>
+</body>
+</html>

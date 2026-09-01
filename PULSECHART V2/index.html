@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PulseChart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=7">
+<style>
+.boot{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--mut);font-size:13.5px}
+.spinner{width:18px;height:18px;border:2px solid var(--line);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- LOADING (shown while checking who you are) -->
+<div id="boot" class="boot"><span class="spinner"></span> Loading PulseChart</div>
+
+<!-- LOGIN (hidden until we know you are signed out) -->
+<section id="auth" class="auth-wrap" hidden>
+  <div class="card">
+    <div class="brand"><span class="logo">PulseChart</span><span class="practice"></span></div>
+    <div id="banner" class="banner" role="status" aria-live="polite"></div>
+    <div class="tabs">
+      <button type="button" id="tabLogin" class="tab on">Sign in</button>
+      <button type="button" id="tabReg" class="tab">First-time setup</button>
+    </div>
+    <form id="loginForm">
+      <label>Email <input id="li-email" type="email" required autocomplete="username"></label>
+      <label>Password <input id="li-pass" type="password" required autocomplete="current-password"></label>
+      <button class="btn">Sign in</button>
+    </form>
+    <form id="regForm" hidden>
+      <label>Full name <input id="rg-name" required></label>
+      <label>Role
+        <select id="rg-role"><option value="doctor">Doctor</option><option value="nurse">Nurse</option></select>
+      </label>
+      <label>Email <input id="rg-email" type="email" required></label>
+      <label>Password (8+ characters) <input id="rg-pass" type="password" minlength="8" required></label>
+      <label>Invite code <input id="rg-invite" required></label>
+      <button class="btn">Create staff account</button>
+    </form>
+  </div>
+</section>
+
+<!-- APP -->
+<section id="app" hidden>
+  <aside class="side">
+    <div class="slogo">PulseChart<small class="practice"></small></div>
+    <nav class="nav">
+      <span class="on" data-ic="users">Patients</span>
+      <span data-ic="calendar">Follow-ups</span>
+      <span data-ic="pill">Drug favorites</span>
+    </nav>
+    <div class="sunav">Clinic</div>
+    <nav class="nav">
+      <span data-ic="userplus">Staff</span>
+      <span data-ic="sliders">Settings<span class="soon">soon</span></span>
+    </nav>
+    <div class="suser">
+      <div><b id="sideName"></b><small id="sideRole"></small></div>
+      <button id="btnOut" class="sout" title="Sign out" data-ic="logout" data-size="16"></button>
+    </div>
+  </aside>
+
+  <div class="cont">
+    <div class="topbar">
+      <div class="search" id="topSearch" data-ic="search">
+        <input id="searchBox" type="search" placeholder="Search patients by name or phone" autocomplete="off">
+      </div>
+      <span class="crumb" id="topCrumb" hidden>Patients / <b id="crumbName"></b></span>
+      <div class="userchip"><span id="who"></span><span class="av" id="whoAv"></span></div>
+    </div>
+
+    <main>
+      <section id="viewPatients">
+        <div class="page-head">
+          <h1 class="page-title">Patients</h1>
+          <button id="btnAdd" class="btn-solid" type="button" data-ic="plus">Add patient</button>
+        </div>
+        <div class="list-head">
+          <span id="countLabel"></span>
+          <label class="chk"><input type="checkbox" id="showArchived"> Show archived</label>
+        </div>
+        <div id="patientList"></div>
+      </section>
+
+      <section id="viewPatient" hidden>
+        <button id="btnBack" class="linkbtn" type="button" data-ic="chevup">All patients</button>
+        <div id="patientDetail"></div>
+
+        <div id="trendCard" class="trend-card" hidden>
+          <button id="trendToggle" class="trend-toggle" type="button">
+            <span class="tt-left" data-ic="activity"><b>Vitals trend</b></span>
+            <span id="trendLatest" class="trend-sub"></span>
+            <span id="trendCaret" class="tt-caret"></span>
+          </button>
+          <div id="trendBody" hidden>
+            <div class="mchips" id="metricChips"></div>
+            <div id="trendChart"></div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div>
+            <div class="sec-head-row">
+              <div class="sec-label">Lab results</div>
+              <button id="btnAllLabs" class="viewall" type="button" hidden></button>
+            </div>
+            <div id="labList"></div>
+          </div>
+          <div>
+            <div class="sec-head-row">
+              <div class="sec-label">Visit history</div>
+              <button id="btnAllVisits" class="viewall" type="button" hidden></button>
+            </div>
+            <div id="visitHistory"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</section>
+
+<!-- ADD PATIENT -->
+<dialog id="dlgPatient">
+  <div class="dlg-head"><b>Add patient</b><button id="dlgClose" class="xbtn" type="button" data-ic="x" data-size="16"></button></div>
+  <form id="formPatient" class="dlg-body">
+    <label>Full name * <input id="pf-name" required></label>
+    <label>Phone (WhatsApp) <input id="pf-phone" type="tel" placeholder="e.g. 0803 123 4567"></label>
+    <div class="two">
+      <label>Sex
+        <select id="pf-sex"><option value="">Not set</option><option value="female">Female</option><option value="male">Male</option></select>
+      </label>
+    </div>
+    <label>Date of birth
+      <div class="trio" id="pf-dob"></div>
+    </label>
+    <label>Existing conditions <textarea id="pf-cond" rows="2" placeholder="Separate with commas, e.g. Hypertension, Diabetes"></textarea></label>
+    <label>Known allergies <textarea id="pf-all" rows="2" placeholder="e.g. Penicillin"></textarea></label>
+    <button class="btn">Save patient</button>
+  </form>
+</dialog>
+
+<!-- EDIT PATIENT -->
+<dialog id="dlgEdit">
+  <div class="dlg-head"><b>Edit patient</b><span class="dlg-sub" id="dlgEditWho"></span><button id="edlgClose" class="xbtn" type="button" style="margin-left:auto" data-ic="x" data-size="16"></button></div>
+  <form id="formEdit" class="dlg-body dlg-scroll">
+    <label>Full name * <input id="ed-name" required></label>
+    <label>Phone (WhatsApp) <input id="ed-phone" type="tel" placeholder="e.g. 0803 123 4567"></label>
+    <div class="two">
+      <label>Sex
+        <select id="ed-sex"><option value="">Not set</option><option value="female">Female</option><option value="male">Male</option></select>
+      </label>
+    </div>
+    <label>Date of birth
+      <div class="trio" id="ed-dob"></div>
+    </label>
+    <label>Existing conditions <textarea id="ed-cond" rows="2" placeholder="Separate with commas, e.g. Hypertension, Diabetes"></textarea></label>
+    <label>Known allergies <textarea id="ed-all" rows="2" placeholder="e.g. Penicillin"></textarea></label>
+    <button class="btn">Save changes</button>
+  </form>
+</dialog>
+
+<!-- RECORD VISIT -->
+<dialog id="dlgVisit">
+  <div class="dlg-head"><b>Record visit</b><span class="dlg-sub" id="dlgWho"></span><button id="vdlgClose" class="xbtn" type="button" style="margin-left:auto" data-ic="x" data-size="16"></button></div>
+  <form id="formVisit" class="dlg-body dlg-scroll">
+    <div class="dlg-sec">
+      <h4>Visit</h4>
+      <div class="qchips" id="complaintChips"></div>
+      <label>Complaint * <input id="vf-complaint" required placeholder="e.g. Fever and body weakness for 3 days"></label>
+      <label>Diagnosis <input id="vf-diag" placeholder="e.g. Uncomplicated malaria"></label>
+      <label>Notes <textarea id="vf-notes" rows="3" placeholder="Findings, plan, advice"></textarea></label>
+      <label>Follow-up date
+        <div class="trio" id="vf-follow"></div>
+      </label>
+    </div>
+    <div class="dlg-sec">
+      <h4>Vitals, as measured now (optional)</h4>
+      <div class="two">
+        <label>Systolic BP <input id="vf-sys" type="number" min="50" max="260" placeholder="mmHg"></label>
+        <label>Diastolic BP <input id="vf-dia" type="number" min="20" max="160" placeholder="mmHg"></label>
+        <label>Pulse <input id="vf-pulse" type="number" min="20" max="220" placeholder="bpm"></label>
+        <label>Temperature <input id="vf-temp" type="number" min="30" max="45" step="0.1" placeholder="C"></label>
+        <label>Weight <input id="vf-wt" type="number" min="1" max="300" step="0.1" placeholder="kg"></label>
+      </div>
+    </div>
+    <div class="dlg-sec">
+      <h4>Prescriptions (optional)</h4>
+      <div class="favgrid" id="favGrid"></div>
+      <div class="entry-box">
+        <div class="entry-title">Add a drug manually</div>
+        <div class="crow">
+          <input id="cd-name" placeholder="Drug name">
+          <input id="cd-dose" placeholder="Dose">
+          <input id="cd-freq" placeholder="Frequency">
+          <input id="cd-dur" placeholder="Duration">
+        </div>
+        <label class="inline-chk"><input type="checkbox" id="cd-fav"> Also save to favorites</label>
+        <button type="button" id="btnAddRx" class="btn-ghost" data-ic="plus">Add this drug</button>
+        <div id="rxLines" style="margin-top:12px"></div>
+      </div>
+    </div>
+    <button class="btn" style="margin-top:16px">Save visit</button>
+  </form>
+</dialog>
+
+<!-- ADD LAB RESULT -->
+<dialog id="dlgLab">
+  <div class="dlg-head"><b>Add lab result</b><span class="dlg-sub" id="dlgLabWho"></span><button id="ldlgClose" class="xbtn" type="button" style="margin-left:auto" data-ic="x" data-size="16"></button></div>
+  <form id="formLab" class="dlg-body">
+    <label class="filedrop">
+      <input id="lf-file" type="file" accept="image/*,application/pdf" hidden>
+      <span class="big" id="fileLabel" data-ic="camera">Photograph the result, or choose a file</span>
+      <span class="hint" style="margin:6px 0 0;display:block">On a phone this opens the camera. PDFs work too.</span>
+    </label>
+    <label>Title <input id="lf-title" placeholder="e.g. Fasting blood sugar"></label>
+    <label>Link to visit
+      <select id="lf-visit"></select>
+    </label>
+    <p class="hint" style="margin:-6px 0 12px">Defaults to the most recent visit, usually the one that ordered this test. Choose Not linked for results from elsewhere.</p>
+    <label>Date on the report
+      <div class="trio" id="lf-date"></div>
+    </label>
+    <button class="btn" id="btnLabSave">Save to patient file</button>
+  </form>
+</dialog>
+
+<div id="toast" class="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js?v=7"></script>
+<script src="common.js?v=7"></script>
+<script src="app.js?v=7"></script>
+</body>
+</html>

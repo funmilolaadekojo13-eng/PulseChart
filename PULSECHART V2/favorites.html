@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drug favorites · PulseChart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<section id="app">
+  <aside class="side">
+    <div class="slogo">PulseChart<small class="practice"></small></div>
+    <nav class="nav">
+      <span data-ic="users">Patients</span>
+      <span data-ic="calendar">Follow-ups</span>
+      <span class="on" data-ic="pill">Drug favorites</span>
+    </nav>
+    <div class="sunav">Clinic</div>
+    <nav class="nav">
+      <span data-ic="userplus">Staff</span>
+      <span data-ic="sliders">Settings<span class="soon">soon</span></span>
+    </nav>
+    <div class="suser">
+      <div><b id="sideName"></b><small id="sideRole"></small></div>
+      <button id="btnOut" class="sout" title="Sign out" data-ic="logout" data-size="16"></button>
+    </div>
+  </aside>
+
+  <div class="cont">
+    <div class="topbar">
+      <span class="crumb">Clinic / <b>Drug favorites</b></span>
+      <div class="userchip"><span id="who"></span><span class="av" id="whoAv"></span></div>
+    </div>
+    <main>
+      <div class="page-head">
+        <h1 class="page-title">Drug favorites</h1>
+        <button id="btnAddFav" class="btn-solid" type="button" data-ic="plus">Add favorite</button>
+      </div>
+      <p class="count-note" id="favCount"></p>
+      <div id="favList"></div>
+    </main>
+  </div>
+</section>
+
+<dialog id="dlgFav">
+  <div class="dlg-head"><b id="dlgFavTitle">Add favorite</b><button id="favClose" class="xbtn" type="button" data-ic="x" data-size="16"></button></div>
+  <form id="formFav" class="dlg-body">
+    <input type="hidden" id="dlgFavId">
+    <label>Drug name * <input id="fv-name" required></label>
+    <label>Dose <input id="fv-dose" placeholder="e.g. 500 mg"></label>
+    <label>Frequency <input id="fv-freq" placeholder="e.g. Twice daily"></label>
+    <button class="btn">Save favorite</button>
+  </form>
+</dialog>
+
+<div id="toast" class="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="common.js"></script>
+<script src="favorites.js"></script>
+</body>
+</html>

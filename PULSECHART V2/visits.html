@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>All visits · PulseChart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<section id="app">
+  <aside class="side">
+    <div class="slogo">PulseChart<small class="practice"></small></div>
+    <nav class="nav">
+      <span class="on" data-ic="users">Patients</span>
+      <span data-ic="calendar">Follow-ups</span>
+      <span data-ic="pill">Drug favorites</span>
+    </nav>
+    <div class="sunav">Clinic</div>
+    <nav class="nav">
+      <span data-ic="userplus">Staff</span>
+      <span data-ic="sliders">Settings<span class="soon">soon</span></span>
+    </nav>
+    <div class="suser">
+      <div><b id="sideName"></b><small id="sideRole"></small></div>
+      <button id="btnOut" class="sout" title="Sign out" data-ic="logout" data-size="16"></button>
+    </div>
+  </aside>
+
+  <div class="cont">
+    <div class="topbar">
+      <span class="crumb">Patients / <b id="crumbTop"></b></span>
+      <a id="backLink" class="btn-ghost" href="index.html" data-ic="chevleft" data-size="13">Back to patient file</a>
+    </div>
+    <main>
+      <div class="page-head"><h1 class="page-title">All visits</h1></div>
+      <div class="daterange">
+        <span class="dr-lab">From</span>
+        <select id="vh-from-m"></select><select id="vh-from-y"></select>
+        <span class="dr-lab">To</span>
+        <select id="vh-to-m"></select><select id="vh-to-y"></select>
+        <button id="vh-clear" class="btn-tiny" type="button">Clear</button>
+      </div>
+      <div id="visitCount" class="count-note"></div>
+      <div id="visitList"></div>
+    </main>
+  </div>
+</section>
+<div id="toast" class="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="common.js"></script>
+<script src="visits.js"></script>
+</body>
+</html>
